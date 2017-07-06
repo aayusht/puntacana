@@ -1,3 +1,15 @@
 <resources>
     <string name="app_name">Drunk</string>
+
+    <string name="title_activity_welcome">WelcomeActivity</string>
+
+    <string-array name="weight_units">
+        <item>lbs</item>
+        <item>kgs</item>
+    </string-array>
+
+    <string-array name="height_units">
+        <item>in</item>
+        <item>cm</item>
+    </string-array>
 </resources>
