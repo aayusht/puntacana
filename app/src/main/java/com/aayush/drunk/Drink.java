@@ -15,33 +15,38 @@ public class Drink {
     final static String FORTIFIED_WINE = "fortified wine";
     final static String LIQUEUR = "liqueur";
     final static String SHOT = "shot";
+    String type;
     double fractionAlcohol;
     double sizeInG;
     Date timestamp;
 
-    Drink(double fractionAlcohol, double sizeInOz, Date timestamp) {
-        init(fractionAlcohol, sizeInOz, timestamp);
+    Drink(String type, double fractionAlcohol, double sizeInOz, Date timestamp) {
+        this.type = type;
+        this.timestamp = ((Date) timestamp.clone());
+        init(fractionAlcohol, sizeInOz);
     }
 
     Drink(String type, Date timestamp) {
+        this.type = type;
+        this.timestamp = ((Date) timestamp.clone());
         switch (type) {
             case BEER:
-                init(.05, 12, timestamp);
+                init(.05, 12);
                 break;
             case MALT:
-                init(.07, 8.5, timestamp);
+                init(.07, 8.5);
                 break;
             case WINE:
-                init(.12, 5, timestamp);
+                init(.12, 5);
                 break;
             case FORTIFIED_WINE:
-                init(.17, 3.5, timestamp);
+                init(.17, 3.5);
                 break;
             case LIQUEUR:
-                init(.24, 2.5, timestamp);
+                init(.24, 2.5);
                 break;
             case SHOT:
-                init(.4, 1.5, timestamp);
+                init(.4, 1.5);
                 break;
             default:
                 //TODO handle this?
@@ -55,9 +60,8 @@ public class Drink {
         return initialGramsAlc - (Body.bloodVolume / 100) * eliminationRate / hoursElapsed;
     }
 
-    private void init(double fraction_alcohol, double sizeInOz, Date timestamp) {
+    private void init(double fraction_alcohol, double sizeInOz) {
         this.fractionAlcohol = fraction_alcohol;
         this.sizeInG = ozToG(sizeInOz);
-        this.timestamp = (Date) timestamp.clone();
     }
 }

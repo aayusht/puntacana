@@ -19,6 +19,8 @@ import java.util.Calendar;
 import java.util.Date;
 
 import static android.content.Context.MODE_PRIVATE;
+import static com.aayush.drunk.Drink.*;
+import static com.aayush.drunk.Utils.gToOz;
 
 /** The user's body
  *
@@ -34,6 +36,7 @@ import static android.content.Context.MODE_PRIVATE;
  * blood volume for female in ml using in and lbs = .005835 * h^3 + 15 * w + 183
  */
 public class Body {
+    final static int MAX_DRINKS = 10000;
     final static String FILENAME = "bodydata.json";
 
     static double r = 0;
@@ -105,6 +108,7 @@ public class Body {
             JSONArray drinksJSON = new JSONArray();
             for (Drink drink : drinks) {
                 JSONObject drinkJSON = new JSONObject();
+                drinkJSON.put("type", drink.type);
                 drinkJSON.put("fractionAlcohol", drink.fractionAlcohol);
                 drinkJSON.put("sizeInG", drink.sizeInG);
                 drinkJSON.put("timestamp", drink.timestamp.getTime());
@@ -143,11 +147,120 @@ public class Body {
             JSONArray drinksJSON = json.getJSONArray("drinks");
             for (int i = 0; i < drinksJSON.length(); i++) {
                 JSONObject drinkJSON = drinksJSON.getJSONObject(i);
-                drinks.add(new Drink(drinkJSON.getDouble("fractionAlcohol"),
-                        drinkJSON.getDouble("sizeInG"), new Date(drinkJSON.getLong("timestamp"))));
+                drinks.add(new Drink(drinkJSON.getString("type"),
+                        drinkJSON.getDouble("fractionAlcohol"), drinkJSON.getDouble("sizeInG"),
+                        new Date(drinkJSON.getLong("timestamp"))));
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Inserts drink into arraylist chronologically (most recent first)
+     * @param drink Drink to be added
+     */
+    static void addDrink(Drink drink) {
+        int index = getDrinkIndex(drink.timestamp);
+        if (drinks.size() == MAX_DRINKS) {
+            drinks.remove(drinks.size() - 1);
+        }
+        if (index == -1) {
+            drinks.add(drink);
+            return;
+        }
+        drinks.add(index, drink);
+    }
+
+    /**
+     * Gets index of drink immediately after (chronologically before) given time
+     * @param time
+     * @return index of drink in drinks, -1 if none
+     */
+    static int getDrinkIndex(Date time) {
+        if (drinks.size() == 0 || drinks.get(drinks.size() - 1).timestamp.after(time)) {
+            Log.d("msg", "no drinks before this time");
+            return -1;
+        } else if (drinks.get(0).timestamp.before(time)){
+            return 0;
+        } else {
+            int beginIndex = 0;
+            int endIndex = drinks.size();
+            int mid;
+            while (endIndex - beginIndex > 1) {
+                mid = (endIndex - beginIndex) / 2;
+                if (drinks.get(mid).timestamp.before(time)) {
+                    endIndex = mid;
+                } else if (drinks.get(mid).timestamp.after(time)) {
+                    beginIndex = mid;
+                } else {
+                    return mid;
+                }
+            }
+            return endIndex;
+        }
+    }
+
+    static String drinksToString(Date startTime, Date endTime) {
+        int startIndex = getDrinkIndex(endTime); //Not a mistake!
+        if (startIndex == -1) {
+            return "No drinks!";
+        }
+        int endIndex = getDrinkIndex(startTime);
+        String other = "";
+        int shots, beers, malts, wines, fortifieds, liqueurs;
+        shots = beers = malts = wines = fortifieds = liqueurs = 0;
+        for (int i = startIndex; i <= endIndex; i++) {
+            Drink drink = drinks.get(i);
+            switch(drink.type) {
+                case BEER:
+                    beers++;
+                    break;
+                case MALT:
+                    malts++;
+                    break;
+                case WINE:
+                    wines++;
+                    break;
+                case FORTIFIED_WINE:
+                    fortifieds++;
+                    break;
+                case LIQUEUR:
+                    liqueurs++;
+                    break;
+                case SHOT:
+                    shots++;
+                    break;
+                default:
+                    other += drink.type + " (" + (int) (drink.fractionAlcohol * 200) + "-proof, "
+                            + gToOz(drink.sizeInG) + " oz)";
+            }
+        }
+        String str = "";
+        if (shots > 0) {
+            if (shots == 1) { str += 1 + " shot\n"; }
+            else { str += shots + " shots\n"; }
+        }
+        if (beers > 0) {
+            if (beers == 1) { str += 1 + " beers\n"; }
+            else { str += beers + " beers\n"; }
+        }
+        if (malts > 0) {
+            if (malts == 1) { str += 1 + " malts\n"; }
+            else { str += malts + " malts\n"; }
+        }
+        if (wines > 0) {
+            if (wines == 1) { str += 1 + " glass of wine\n"; }
+            else { str += wines + " glasses of wine\n"; }
+        }
+        if (fortifieds > 0) {
+            if (fortifieds == 1) { str += 1 + " glass of fortified wine\n"; }
+            else { str += fortifieds + " glasses of fortified wine\n"; }
+        }
+        if (liqueurs > 0) {
+            if (liqueurs == 1) { str += 1 + " glass of liqueur\n"; }
+            else { str += liqueurs + " glasses of liqueur\n"; }
+        }
+        return str + other;
     }
 }
