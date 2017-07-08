@@ -54,21 +54,24 @@
         android:text="Drinks"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         app:layout_constraintBottom_toBottomOf="@+id/current_bac"
-        tools:layout_editor_absoluteX="16dp" />
+        android:layout_marginLeft="0dp"
+        app:layout_constraintLeft_toLeftOf="@+id/textView6" />
 
     <TextView
         android:id="@+id/textView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginLeft="0dp"
         android:layout_marginRight="8dp"
         android:layout_marginTop="8dp"
         android:text="TextView"
-        app:layout_constraintLeft_toLeftOf="@+id/textView4"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView4"
         android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/beer" />
+        app:layout_constraintBottom_toTopOf="@+id/beer"
+        app:layout_constraintVertical_bias="1.0"
+        android:layout_marginLeft="0dp"
+        app:layout_constraintLeft_toLeftOf="@+id/textView4"
+        app:layout_constraintHorizontal_bias="0.0" />
 
     <Button
         android:id="@+id/custom"

@@ -14,6 +14,7 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -48,13 +49,11 @@ public class Body {
 
 
     static double get_BAC() {
-        Calendar c = Calendar.getInstance();
-        Date currTime = c.getTime();
         double totalAlcohol = 0;
         for (int i = 0; i < 69 && i < drinks.size(); i++) {
-            totalAlcohol += drinks.get(i).currentAlcInBlood(currTime);
+            totalAlcohol += drinks.get(i).currentBAC();
         }
-        return totalAlcohol / bloodVolume;
+        return totalAlcohol;
     }
 
     /**
@@ -148,7 +147,8 @@ public class Body {
             for (int i = 0; i < drinksJSON.length(); i++) {
                 JSONObject drinkJSON = drinksJSON.getJSONObject(i);
                 drinks.add(new Drink(drinkJSON.getString("type"),
-                        drinkJSON.getDouble("fractionAlcohol"), drinkJSON.getDouble("sizeInG"),
+                        drinkJSON.getDouble("fractionAlcohol"),
+                        gToOz(drinkJSON.getDouble("sizeInG")),
                         new Date(drinkJSON.getLong("timestamp"))));
             }
         } catch (Exception e) {
@@ -160,7 +160,7 @@ public class Body {
      * Inserts drink into arraylist chronologically (most recent first)
      * @param drink Drink to be added
      */
-    static void addDrink(Drink drink) {
+    static void addDrink(Drink drink, Context context) {
         int index = getDrinkIndex(drink.timestamp);
         if (drinks.size() == MAX_DRINKS) {
             drinks.remove(drinks.size() - 1);
@@ -170,6 +170,7 @@ public class Body {
             return;
         }
         drinks.add(index, drink);
+        save(context);
     }
 
     /**
@@ -207,9 +208,15 @@ public class Body {
             return "No drinks!";
         }
         int endIndex = getDrinkIndex(startTime);
+        endIndex = endIndex == -1 ? drinks.size() - 1 : endIndex;
+        Log.d("hmm", "" + startTime + " " + startIndex + " " + endTime + " " + endIndex);
         String other = "";
-        int shots, beers, malts, wines, fortifieds, liqueurs;
-        shots = beers = malts = wines = fortifieds = liqueurs = 0;
+        int shots = 0;
+        int beers = 0;
+        int malts = 0;
+        int wines = 0;
+        int fortifieds = 0;
+        int liqueurs = 0;
         for (int i = startIndex; i <= endIndex; i++) {
             Drink drink = drinks.get(i);
             switch(drink.type) {
@@ -233,7 +240,7 @@ public class Body {
                     break;
                 default:
                     other += drink.type + " (" + (int) (drink.fractionAlcohol * 200) + "-proof, "
-                            + gToOz(drink.sizeInG) + " oz)";
+                            + new DecimalFormat("#.##").format(gToOz(drink.sizeInG)) + " oz)";
             }
         }
         String str = "";
@@ -261,6 +268,7 @@ public class Body {
             if (liqueurs == 1) { str += 1 + " glass of liqueur\n"; }
             else { str += liqueurs + " glasses of liqueur\n"; }
         }
+        Log.d("s", "" + drinks.size() + " " + str + other);
         return str + other;
     }
 }
