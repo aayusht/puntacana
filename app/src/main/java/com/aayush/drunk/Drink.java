@@ -58,12 +58,8 @@ public class Drink {
 
     double currentBAC() {
         double initialGramsAlc = sizeInG * fractionAlcohol;
-        double eliminationRate = Body.isAlcoholic ? .025 : .015; //TODO changes if you're hungry tho
-        double hoursElapsed = (System.currentTimeMillis() - timestamp.getTime()) / 3600000.;
-        double alc = initialGramsAlc / (r * weight)  - (bloodVolume / 100) * eliminationRate * hoursElapsed;
-        alc /= 10;
-        Log.d("uh oh", "" + alc + " " + initialGramsAlc);
-        return alc > .0001 ? alc : 0;
+        double alc = initialGramsAlc / (r * weight);
+        return alc / 10;
     }
 
     private void init(double fraction_alcohol, double sizeInOz) {

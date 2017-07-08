@@ -47,13 +47,19 @@ public class Body {
 
     static ArrayList<Drink> drinks = new ArrayList<>();
 
-
     static double get_BAC() {
-        double totalAlcohol = 0;
-        for (int i = 0; i < 69 && i < drinks.size(); i++) {
-            totalAlcohol += drinks.get(i).currentBAC();
+        int i = Math.min(drinks.size() - 1, 69);
+        double totalAlcohol = drinks.get(i).currentBAC();
+        long prevTime = drinks.get(i).timestamp.getTime();
+        double eliminationRate = Body.isAlcoholic ? .025 : .015; //TODO changes if you're hungry tho
+        while (i > 0) {
+            Drink nextDrink = drinks.get(--i);
+            double hoursElapsed = (nextDrink.timestamp.getTime() - prevTime) / 3600000.;
+            double alc = nextDrink.currentBAC() - eliminationRate * bloodVolume / 100 * hoursElapsed;
+            totalAlcohol += Math.max(alc, 0);
+            prevTime = nextDrink.timestamp.getTime();
         }
-        return totalAlcohol;
+        return totalAlcohol - (System.currentTimeMillis() - prevTime) / 3600000. * bloodVolume / 100 * eliminationRate;
     }
 
     /**
@@ -182,7 +188,7 @@ public class Body {
         if (drinks.size() == 0 || drinks.get(drinks.size() - 1).timestamp.after(time)) {
             Log.d("msg", "no drinks before this time");
             return -1;
-        } else if (drinks.get(0).timestamp.before(time)){
+        } else if (drinks.get(0).timestamp.before(time) || drinks.get(0).timestamp.equals(time)){
             return 0;
         } else {
             int beginIndex = 0;
@@ -249,11 +255,11 @@ public class Body {
             else { str += shots + " shots\n"; }
         }
         if (beers > 0) {
-            if (beers == 1) { str += 1 + " beers\n"; }
+            if (beers == 1) { str += 1 + " beer\n"; }
             else { str += beers + " beers\n"; }
         }
         if (malts > 0) {
-            if (malts == 1) { str += 1 + " malts\n"; }
+            if (malts == 1) { str += 1 + " malt\n"; }
             else { str += malts + " malts\n"; }
         }
         if (wines > 0) {
