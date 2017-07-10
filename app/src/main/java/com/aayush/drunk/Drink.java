@@ -2,9 +2,11 @@ package com.aayush.drunk;
 
 import android.util.Log;
 
+import java.text.DecimalFormat;
 import java.util.Date;
 
 import static com.aayush.drunk.Body.*;
+import static com.aayush.drunk.Utils.gToOz;
 import static com.aayush.drunk.Utils.ozToG;
 
 /**
@@ -65,5 +67,11 @@ public class Drink {
     private void init(double fraction_alcohol, double sizeInOz) {
         this.fractionAlcohol = fraction_alcohol;
         this.sizeInG = ozToG(sizeInOz);
+    }
+
+    @Override
+    public String toString() {
+        return type + " (" + Math.round(fractionAlcohol * 200) + "-proof, "
+                + new DecimalFormat("#.##").format(gToOz(sizeInG)) + " oz)";
     }
 }

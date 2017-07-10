@@ -12,4 +12,14 @@
         <item>in</item>
         <item>cm</item>
     </string-array>
+
+    <string-array name="vol_units">
+        <item>oz</item>
+        <item>mL</item>
+    </string-array>
+
+    <string-array name="fraction_units">
+        <item>proof</item>
+        <item>percent</item>
+    </string-array>
 </resources>

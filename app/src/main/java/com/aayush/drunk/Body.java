@@ -18,6 +18,8 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import static android.content.Context.MODE_PRIVATE;
 import static com.aayush.drunk.Drink.*;
@@ -55,11 +57,35 @@ public class Body {
         while (i > 0) {
             Drink nextDrink = drinks.get(--i);
             double hoursElapsed = (nextDrink.timestamp.getTime() - prevTime) / 3600000.;
-            double alc = nextDrink.currentBAC() - eliminationRate * bloodVolume / 100 * hoursElapsed;
+            double alc = nextDrink.currentBAC() - eliminationRate * hoursElapsed;
             totalAlcohol += Math.max(alc, 0);
             prevTime = nextDrink.timestamp.getTime();
         }
-        return totalAlcohol - (System.currentTimeMillis() - prevTime) / 3600000. * bloodVolume / 100 * eliminationRate;
+        return totalAlcohol - ((System.currentTimeMillis() - prevTime) / 3600000.) * eliminationRate;
+    }
+
+    static double peak_BAC(Date beginTime, Date endTime) {
+        int startIndex = getDrinkIndex(endTime); //Not a mistake!
+        if (startIndex == -1) {
+            return 0.;
+        }
+        startIndex = Math.max(startIndex - 20, 0);
+        int endIndex = getDrinkIndex(beginTime);
+        endIndex = endIndex < 0 ? drinks.size() - 1 : endIndex;
+        int i = endIndex;
+        double totalAlcohol = drinks.get(i).currentBAC();
+        double peakAlcohol = totalAlcohol;
+        long prevTime = drinks.get(i).timestamp.getTime();
+        double eliminationRate = Body.isAlcoholic ? .025 : .015; //TODO changes if you're hungry tho
+        while (i > startIndex) {
+            Drink nextDrink = drinks.get(--i);
+            double hoursElapsed = (nextDrink.timestamp.getTime() - prevTime) / 3600000.;
+            double alc = nextDrink.currentBAC() - eliminationRate * hoursElapsed;
+            totalAlcohol += Math.max(alc, 0);
+            peakAlcohol = Math.max(totalAlcohol, peakAlcohol);
+            prevTime = nextDrink.timestamp.getTime();
+        }
+        return peakAlcohol;
     }
 
     /**
@@ -208,7 +234,7 @@ public class Body {
         }
     }
 
-    static String drinksToString(Date startTime, Date endTime) {
+    static String drinksOverview(Date startTime, Date endTime) {
         int startIndex = getDrinkIndex(endTime); //Not a mistake!
         if (startIndex == -1) {
             return "No drinks!";
@@ -217,6 +243,7 @@ public class Body {
         endIndex = endIndex == -1 ? drinks.size() - 1 : endIndex;
         Log.d("hmm", "" + startTime + " " + startIndex + " " + endTime + " " + endIndex);
         String other = "";
+        HashMap<String, Integer> otherDrinks = new HashMap<>();
         int shots = 0;
         int beers = 0;
         int malts = 0;
@@ -245,36 +272,44 @@ public class Body {
                     shots++;
                     break;
                 default:
-                    other += drink.type + " (" + (int) (drink.fractionAlcohol * 200) + "-proof, "
-                            + new DecimalFormat("#.##").format(gToOz(drink.sizeInG)) + " oz)";
+                    String drinkString = drink.toString();
+                    if (otherDrinks.get(drinkString) == null) {
+                        otherDrinks.put(drinkString, 1);
+                    } else {
+                        otherDrinks.put(drinkString, otherDrinks.get(drinkString) + 1);
+                    }
             }
         }
         String str = "";
         if (shots > 0) {
-            if (shots == 1) { str += 1 + " shot\n"; }
-            else { str += shots + " shots\n"; }
+            if (shots == 1) { str += "a shot, "; }
+            else { str += shots + " shots, "; }
         }
         if (beers > 0) {
-            if (beers == 1) { str += 1 + " beer\n"; }
-            else { str += beers + " beers\n"; }
+            if (beers == 1) { str += "a beer, "; }
+            else { str += beers + " beers, "; }
         }
         if (malts > 0) {
-            if (malts == 1) { str += 1 + " malt\n"; }
-            else { str += malts + " malts\n"; }
+            if (malts == 1) { str += "a malt, "; }
+            else { str += malts + " malts, "; }
         }
         if (wines > 0) {
-            if (wines == 1) { str += 1 + " glass of wine\n"; }
-            else { str += wines + " glasses of wine\n"; }
+            if (wines == 1) { str += "a glass of wine, "; }
+            else { str += wines + " glasses of wine, "; }
         }
         if (fortifieds > 0) {
-            if (fortifieds == 1) { str += 1 + " glass of fortified wine\n"; }
-            else { str += fortifieds + " glasses of fortified wine\n"; }
+            if (fortifieds == 1) { str += "a glass of fortified wine, "; }
+            else { str += fortifieds + " glasses of fortified wine, "; }
         }
         if (liqueurs > 0) {
-            if (liqueurs == 1) { str += 1 + " glass of liqueur\n"; }
-            else { str += liqueurs + " glasses of liqueur\n"; }
+            if (liqueurs == 1) { str += "a glass of liqueur, "; }
+            else { str += liqueurs + " glasses of liqueur, "; }
         }
-        Log.d("s", "" + drinks.size() + " " + str + other);
+        for (Map.Entry<String, Integer> entry : otherDrinks.entrySet()) {
+            other += entry.getValue() + " " + entry.getKey() + ", ";
+        }
+        other += "with a peak BAC of "
+                + new DecimalFormat("#.###").format(peak_BAC(startTime, endTime)) + "%";
         return str + other;
     }
 }

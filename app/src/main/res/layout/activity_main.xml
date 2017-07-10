@@ -7,16 +7,16 @@
     tools:context="com.aayush.drunk.MainActivity">
 
     <TextView
-        android:id="@+id/textView6"
+        android:id="@+id/dayText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Today"
-        android:textAppearance="@style/TextAppearance.AppCompat.Title"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="16dp"
         android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:text="Today"
+        android:textAppearance="@style/TextAppearance.AppCompat.Headline"
         app:layout_constraintLeft_toLeftOf="parent"
-        android:layout_marginStart="16dp" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/current_bac"
@@ -25,16 +25,16 @@
         android:text="0.00%"
         android:textAppearance="@style/TextAppearance.AppCompat.Display1"
         android:textColor="@color/colorPrimaryDark"
-        app:layout_constraintTop_toBottomOf="@+id/textView10"
-        app:layout_constraintRight_toRightOf="@+id/textView10" />
+        app:layout_constraintTop_toBottomOf="@+id/BACtext"
+        app:layout_constraintRight_toRightOf="@+id/BACtext" />
 
     <TextView
-        android:id="@+id/textView10"
+        android:id="@+id/BACtext"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Current BAC"
         android:textAppearance="@style/TextAppearance.AppCompat"
-        app:layout_constraintTop_toTopOf="@+id/textView6"
+        app:layout_constraintTop_toTopOf="@+id/dayText"
         android:layout_marginRight="15dp"
         app:layout_constraintRight_toRightOf="parent"
         android:layout_marginEnd="15dp" />
@@ -50,28 +50,26 @@
         android:id="@+id/textView4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:text="Drinks"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-        app:layout_constraintBottom_toBottomOf="@+id/current_bac"
         android:layout_marginLeft="0dp"
-        app:layout_constraintLeft_toLeftOf="@+id/textView6" />
+        android:layout_marginTop="8dp"
+        android:text="Overview"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        app:layout_constraintLeft_toLeftOf="@+id/dayText"
+        app:layout_constraintTop_toBottomOf="@+id/dayText" />
 
     <TextView
         android:id="@+id/textView"
         android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="0dp"
         android:layout_marginRight="8dp"
         android:layout_marginTop="8dp"
-        android:text="TextView"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView4"
-        android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/beer"
-        app:layout_constraintVertical_bias="1.0"
-        android:layout_marginLeft="0dp"
+        android:text="Sober!"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintLeft_toLeftOf="@+id/textView4"
-        app:layout_constraintHorizontal_bias="0.0" />
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView4" />
 
     <Button
         android:id="@+id/custom"
@@ -135,6 +133,30 @@
         app:layout_constraintBottom_toTopOf="@+id/other"
         app:layout_constraintLeft_toRightOf="@+id/shot"
         app:layout_constraintRight_toRightOf="parent" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="0dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/shot"
+        app:layout_constraintLeft_toLeftOf="@+id/textView2"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView2" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="0dp"
+        android:layout_marginTop="8dp"
+        android:text="Drinks"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        app:layout_constraintLeft_toLeftOf="@+id/textView"
+        app:layout_constraintTop_toBottomOf="@+id/textView" />
 
 
 </android.support.constraint.ConstraintLayout>
