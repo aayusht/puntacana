@@ -47,7 +47,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         ArrayAdapter adapter2 = ArrayAdapter.createFromResource(this,
                 R.array.height_units, R.layout.spinner_item);
 
-        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        adapter2.setDropDownViewResource(R.layout.spinner_dropdown_item);
         ((Spinner) findViewById(R.id.height_spinner)).setAdapter(adapter2);
 
         findViewById(R.id.continue_button).setOnClickListener(this);
@@ -74,7 +74,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
                     SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
                     SharedPreferences.Editor editor = sharedPref.edit();
                     editor.putBoolean("initialized", true);
-                    editor.commit();
+                    editor.apply();
                     startActivity(new Intent(this, MainActivity.class));
                 }
         }

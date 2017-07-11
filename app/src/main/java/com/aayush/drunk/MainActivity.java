@@ -1,5 +1,6 @@
 package com.aayush.drunk;
 
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
@@ -8,10 +9,15 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.TextView;
 
+import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -23,6 +29,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Date beginTime;
     Date endTime;
     DrinkAdapter drinkAdapter;
+    RecyclerView recyclerView;
     Thread bacThread;
 
     @Override
@@ -37,7 +44,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         load(this);
         setDate(new Date(System.currentTimeMillis()));
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
+        recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         drinkAdapter = new DrinkAdapter(beginTime, endTime);
         recyclerView.setAdapter(drinkAdapter);
@@ -102,11 +109,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         addDrink(new Drink(Drink.BEER, timestamp), this);
                         break;
                 }
-                if (timestamp.after(beginTime) && timestamp.before(endTime)) {
-                    updateDrinks();
-                }
         }
-
+        if (timestamp.after(beginTime) && timestamp.before(endTime)) {
+            updateDrinks();
+        }
     }
 
     @Override
@@ -117,9 +123,60 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         updateDrinks();
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_activity_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.chooseDate:
+                final Calendar cal = new GregorianCalendar();
+                cal.setTime(beginTime);
+                DatePickerDialog datePickerDialog = new DatePickerDialog(this,
+                        new DatePickerDialog.OnDateSetListener() {
+
+                            @Override
+                            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                                cal.set(Calendar.YEAR, year);
+                                cal.set(Calendar.MONTH, monthOfYear);
+                                cal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                                cal.set(Calendar.HOUR_OF_DAY, 11);
+                                setDate(cal.getTime());
+                                String str = DateFormat.getDateInstance().format(cal.getTime());
+                                if (str.equals(DateFormat.getDateInstance().format(new Date(System.currentTimeMillis())))) {
+                                    str = "Today";
+                                } else if (str.equals(DateFormat.getDateInstance().format(new Date(System.currentTimeMillis() - 24 * 60 * 60 * 1000)))) {
+                                    str = "Yesterday";
+                                }
+                                ((TextView) findViewById(R.id.dayText)).setText(str);
+                                drinkAdapter = new DrinkAdapter(beginTime, endTime);
+                                recyclerView.setAdapter(drinkAdapter);
+                                ((TextView) findViewById(R.id.textView)).setText(
+                                        drinksOverview(beginTime, endTime));
+                            }
+                        }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH));
+                datePickerDialog.show();
+                return true;
+            case R.id.settings:
+                return true;
+            case R.id.info:
+                return true;
+            case R.id.shortcut:
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
     private void updateDrinks() {
         ((TextView) findViewById(R.id.textView)).setText(drinksOverview(beginTime, endTime));
-        drinkAdapter.notifyDataSetChanged();
+        drinkAdapter = new DrinkAdapter(beginTime, endTime);
+        recyclerView.setAdapter(drinkAdapter);
         bacThread.interrupt();
         bacThread.start();
     }

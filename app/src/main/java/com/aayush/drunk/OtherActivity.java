@@ -2,6 +2,7 @@ package com.aayush.drunk;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
@@ -96,8 +97,11 @@ public class OtherActivity extends AppCompatActivity implements View.OnClickList
                         sizeInOz = Utils.gToOz(sizeInOz);
                     }
                     Body.addDrink(new Drink(type, fractionAlcohol, sizeInOz, timestamp), this);
+                    Body.save(this);
                 }
+                Intent intent = new Intent(this, MainActivity.class);
                 finish();
+                startActivity(intent);
         }
     }
 

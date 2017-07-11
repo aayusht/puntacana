@@ -6,6 +6,7 @@ package com.aayush.drunk;
 
 import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -50,6 +51,7 @@ public class Body {
     static ArrayList<Drink> drinks = new ArrayList<>();
 
     static double get_BAC() {
+        if (drinks.size() == 0) { return 0; }
         int i = Math.min(drinks.size() - 1, 69);
         double totalAlcohol = drinks.get(i).currentBAC();
         long prevTime = drinks.get(i).timestamp.getTime();
@@ -61,7 +63,7 @@ public class Body {
             totalAlcohol += Math.max(alc, 0);
             prevTime = nextDrink.timestamp.getTime();
         }
-        return totalAlcohol - ((System.currentTimeMillis() - prevTime) / 3600000.) * eliminationRate;
+        return Math.max(totalAlcohol - ((System.currentTimeMillis() - prevTime) / 3600000.) * eliminationRate, 0);
     }
 
     static double peak_BAC(Date beginTime, Date endTime) {
@@ -82,7 +84,9 @@ public class Body {
             double hoursElapsed = (nextDrink.timestamp.getTime() - prevTime) / 3600000.;
             double alc = nextDrink.currentBAC() - eliminationRate * hoursElapsed;
             totalAlcohol += Math.max(alc, 0);
-            peakAlcohol = Math.max(totalAlcohol, peakAlcohol);
+            if (nextDrink.timestamp.after(beginTime)) {
+                peakAlcohol = Math.max(totalAlcohol, peakAlcohol);
+            }
             prevTime = nextDrink.timestamp.getTime();
         }
         return peakAlcohol;
@@ -240,7 +244,7 @@ public class Body {
             return "No drinks!";
         }
         int endIndex = getDrinkIndex(startTime);
-        endIndex = endIndex == -1 ? drinks.size() - 1 : endIndex;
+        endIndex = endIndex == -1 ? drinks.size() - 1 : endIndex - 1;
         Log.d("hmm", "" + startTime + " " + startIndex + " " + endTime + " " + endIndex);
         String other = "";
         HashMap<String, Integer> otherDrinks = new HashMap<>();
@@ -308,8 +312,15 @@ public class Body {
         for (Map.Entry<String, Integer> entry : otherDrinks.entrySet()) {
             other += entry.getValue() + " " + entry.getKey() + ", ";
         }
-        other += "with a peak BAC of "
-                + new DecimalFormat("#.###").format(peak_BAC(startTime, endTime)) + "%";
+        if (!(str.equals("") && other.equals(""))) {
+            other += "and a peak BAC of "
+                    + new DecimalFormat("#.###").format(peak_BAC(startTime, endTime)) + "%";
+        } else {
+            return "Sober!";
+        }
+        if (str.charAt(0) == 'a') {
+            str = "A" + str.substring(1);
+        }
         return str + other;
     }
 }

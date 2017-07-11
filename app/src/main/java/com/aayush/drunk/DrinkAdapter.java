@@ -23,9 +23,13 @@ public class DrinkAdapter extends RecyclerView.Adapter<DrinkAdapter.CustomViewHo
     public DrinkAdapter(Date beginTime, Date endTime) {
         this.beginTime = beginTime;
         this.endTime = endTime;
+        setIndices();
+    }
+
+    public void setIndices() {
         this.beginIndex = getDrinkIndex(endTime);
         this.endIndex = getDrinkIndex(beginTime);
-        endIndex = endIndex == -1 ? drinks.size() - 1 : endIndex;
+        endIndex = endIndex == -1 ? drinks.size() - 1 : endIndex - 1;
     }
 
     @Override
